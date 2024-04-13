@@ -31,6 +31,7 @@ func Authentication() gin.HandlerFunc {
 		c.Set("email", claims.Email)
 		c.Set("name", claims.Name)
 		c.Set("uid", claims.Uid)
+		c.Set("userID", claims.Uid)
 
 		c.Next()
 

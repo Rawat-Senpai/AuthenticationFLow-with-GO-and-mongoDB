@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github/rawat-senpai/middleware"
 	"github/rawat-senpai/routes"
 	"os"
 
@@ -23,18 +22,11 @@ func main() {
 
 	routes.UserRoutes(router)
 
-	router.Use(middleware.Authentication())
+	// notesRouter := gin.New()
+	// notesRouter.Use(middleware.Authentication())
 
-	//API  2
-
-	router.GET("/api-1", func(c *gin.Context) {
-		c.JSON(200, gin.H{"success": "Access granted for api -1 "})
-
-	})
-
-	router.GET("/api-2", func(c *gin.Context) {
-		c.JSON(200, gin.H{"success": "Access granted for api-2"})
-	})
+	// router.Use(middleware.Authentication())
+	// routes.NotesRoutes(notesRouter)
 
 	router.Run(":" + port)
 
