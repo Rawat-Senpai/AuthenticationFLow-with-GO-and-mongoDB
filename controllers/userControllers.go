@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github/rawat-senpai/database"
+	"github/rawat-senpai/helpers"
 	"github/rawat-senpai/models"
 	"log"
 	"net/http"
@@ -111,6 +112,44 @@ func SignUp() gin.HandlerFunc {
 		defer cancel()
 
 		c.JSON(http.StatusOK, resultInsertionNumber)
+
+	}
+}
+
+func Login() gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		var user models.User
+		var foundUser models.User
+
+		if err := c.BindJSON(&user); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		err := userCollection.FindOne(ctx, bson.M{"email": user.Email}).Decode(&foundUser)
+
+		defer cancel()
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "login or password is wrong "})
+			return
+		}
+
+		passwordIsValid, msg := VerifyPassword(*user.Passowrd, *foundUser.Passowrd)
+		defer cancel()
+
+		if passwordIsValid != true {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": msg})
+			return
+		}
+
+		token, refreshToken, _ := helpers.GenerateAllToken(*foundUser.Email, *foundUser.Name, foundUser.User_id)
+
+		helpers.UpdateAllTokens(token, refreshToken, foundUser.User_id)
+
+		c.JSON(http.StatusOK, foundUser)
 
 	}
 }
