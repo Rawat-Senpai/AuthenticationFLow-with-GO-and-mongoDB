@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github/rawat-senpai/helpers"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -20,6 +21,12 @@ func Authentication() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
+
+		reqToken := c.Request.Header.Get("Authorization")
+		splitToken := strings.Split(reqToken, "Bearer ")
+		reqToken = splitToken[1]
+
+		fmt.Printf("final token passwd in bearer" + reqToken)
 
 		claims, err := helpers.ValidateToken(clientToken)
 		if err != "" {
