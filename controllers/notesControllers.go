@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -135,6 +136,56 @@ func GetAllNotesNotesHandler() gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, notes)
+
+	}
+}
+
+func UpdateNoteHandler() gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		var updateValues map[string]interface{}
+
+		// Parse request body to extract values to update
+		if err := c.BindJSON(&updateValues); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+			return
+		}
+
+		noteID := c.Param("noteID")
+		if noteID == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Note Id is not provided"})
+		}
+
+		// Check if updateValues is empty
+		if len(updateValues) == 0 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "No update values provided"})
+			return
+		}
+
+		// Construct the update query
+		update := bson.M{"$set": updateValues}
+		noteIDHex, err := primitive.ObjectIDFromHex(noteID)
+		if err != nil {
+			// Handle error
+			fmt.Println("Invalid note ID:", err)
+			return
+		}
+
+		// Specify the filter to identify the note to update
+		filter := bson.M{"_id": noteIDHex}
+
+		updateResult, err := noteCollection.UpdateOne(context.Background(), filter, update)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update note", "details": err.Error()})
+			return
+		}
+
+		// Check if any documents were matched and modified
+		if updateResult.MatchedCount == 0 {
+			c.JSON(http.StatusNotFound, gin.H{"error": "No matching document found for update"})
+			return
+		}
+		c.JSON(http.StatusOK, updateResult)
 
 	}
 }

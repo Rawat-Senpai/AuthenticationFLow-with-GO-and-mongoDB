@@ -12,4 +12,5 @@ func NotesRoutes(incomingRout *gin.Engine) {
 	incomingRout.POST("/notes/add", controllers.CreateNoteHandler())
 	incomingRout.GET("/notes/getUserNotes", controllers.GetNotesHandler())
 	incomingRout.GET("/notes/allnotes", controllers.GetAllNotesNotesHandler())
+	incomingRout.PUT("/notes/:noteID", controllers.UpdateNoteHandler())
 }
