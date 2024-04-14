@@ -53,16 +53,52 @@ func CreateNoteHandler() gin.HandlerFunc {
 func GetNotesHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
-		userId, exists := c.Get("Uid")
+		userId, exists := c.Get("uid")
 		if !exists {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "User id not found in context"})
 			return
 		}
-
-		cursor, err := noteCollection.Find(context.Background(), bson.M{"userid": userId})
-
+		cursor, err := noteCollection.Find(context.Background(), bson.M{})
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrive notes"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to retrive the notes "})
+			fmt.Println("Error querying database:", err)
+			return
+		}
+
+		defer cursor.Close(context.Background())
+
+		var notes []models.Notes
+		// Create a new slice to store filtered notes
+
+		if err := cursor.All(context.Background(), &notes); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve notes"})
+			fmt.Println("Error decoding notes:", err)
+			return
+		}
+		// Print the value of notes
+		var userNotes []models.Notes
+
+		for _, note := range notes {
+
+			if note.CreatedBy == userId {
+				userNotes = append(userNotes, note)
+				fmt.Println("true:", "true")
+			}
+			fmt.Println("true:", "false")
+		}
+		// Return the retrieved notes
+		c.JSON(http.StatusOK, userNotes)
+
+	}
+}
+
+func GetAllNotesNotesHandler() gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		cursor, err := noteCollection.Find(context.Background(), bson.M{})
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to retrive the notes "})
+			fmt.Println("Error querying database:", err)
 			return
 		}
 
@@ -72,9 +108,14 @@ func GetNotesHandler() gin.HandlerFunc {
 
 		if err := cursor.All(context.Background(), &notes); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve notes"})
+			fmt.Println("Error decoding notes:", err)
 			return
 		}
+		// Print the value of notes
+		fmt.Println("Notes:", notes)
 
+		// Return the retrieved notes
 		c.JSON(http.StatusOK, notes)
+
 	}
 }

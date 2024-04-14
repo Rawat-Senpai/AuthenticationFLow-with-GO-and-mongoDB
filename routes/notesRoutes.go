@@ -10,6 +10,6 @@ import (
 func NotesRoutes(incomingRout *gin.Engine) {
 	incomingRout.Use(middleware.Authentication())
 	incomingRout.POST("/notes/add", controllers.CreateNoteHandler())
-	incomingRout.GET("/notes", controllers.GetNotesHandler())
-
+	incomingRout.GET("/notes/getUserNotes", controllers.GetNotesHandler())
+	incomingRout.GET("/notes/allnotes", controllers.GetAllNotesNotesHandler())
 }
