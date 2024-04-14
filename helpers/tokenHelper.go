@@ -16,9 +16,7 @@ import (
 )
 
 type SignedDetails struct {
-	Email string
-	Name  string
-	Uid   string
+	Uid string
 	jwt.StandardClaims
 }
 
@@ -29,9 +27,7 @@ var SECRET_KEY = os.Getenv("SECRET_KEY")
 func GenerateAllToken(email string, name string, uid string) (signedToken string, signedRefreshToken string, err error) {
 
 	claims := &SignedDetails{
-		Email: email,
-		Name:  name,
-		Uid:   uid,
+		Uid: uid,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Local().Add(time.Hour * time.Duration(24)).Unix(),
 		},

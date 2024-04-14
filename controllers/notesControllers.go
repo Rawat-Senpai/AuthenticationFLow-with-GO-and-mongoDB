@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"github/rawat-senpai/database"
 	"github/rawat-senpai/models"
 	"net/http"
@@ -17,15 +18,19 @@ func CreateNoteHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		var note models.Notes
-
+		token := c.Request.Header.Get("token")
+		fmt.Printf(token)
 		if err := c.BindJSON(&note); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 
-		// getUser if from jwt token
-		// userId := getUserIdFromToken(c)
-		userId, exists := c.Get("userid")
+		if token == "" {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"Message": "Authorization Header Not Found"})
+			return
+		}
+
+		userId, exists := c.Get("uid")
 		if !exists {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "User id not found in context"})
 			return
@@ -48,7 +53,7 @@ func CreateNoteHandler() gin.HandlerFunc {
 func GetNotesHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
-		userId, exists := c.Get("userid")
+		userId, exists := c.Get("Uid")
 		if !exists {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "User id not found in context"})
 			return

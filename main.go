@@ -3,13 +3,20 @@ package main
 import (
 	"fmt"
 	"github/rawat-senpai/routes"
+	"log"
 	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func main() {
 	fmt.Println("set up is started ")
+	err := godotenv.Load(".env")
+
+	if err != nil {
+		log.Fatal("error loading .env files")
+	}
 
 	port := os.Getenv("PORT")
 
@@ -21,12 +28,7 @@ func main() {
 	router.Use(gin.Logger())
 
 	routes.UserRoutes(router)
-
-	// notesRouter := gin.New()
-	// notesRouter.Use(middleware.Authentication())
-
-	// router.Use(middleware.Authentication())
-	// routes.NotesRoutes(notesRouter)
+	routes.NotesRoutes(router)
 
 	router.Run(":" + port)
 
