@@ -35,8 +35,17 @@ func CreateNoteHandler() gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "User id not found in context"})
 			return
 		}
+
+		userIdString, ok := userId.(string)
+		if !ok {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "User id is not a string"})
+			return
+		}
+
 		// Associate the note with the user
-		note.CreatedBy = userId.(string)
+		note.CreatedBy = userIdString
+		// Associate the note with the user
+		// note.CreatedBy = userId.(string)
 
 		result, err := noteCollection.InsertOne(context.Background(), note)
 
@@ -58,7 +67,8 @@ func GetNotesHandler() gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "User id not found in context"})
 			return
 		}
-		cursor, err := noteCollection.Find(context.Background(), bson.M{})
+
+		cursor, err := noteCollection.Find(context.Background(), bson.M{"createdBy": userId})
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to retrive the notes "})
 			fmt.Println("Error querying database:", err)
@@ -75,19 +85,14 @@ func GetNotesHandler() gin.HandlerFunc {
 			fmt.Println("Error decoding notes:", err)
 			return
 		}
-		// Print the value of notes
-		var userNotes []models.Notes
 
+		fmt.Println("user tokenoutside for loop ", userId)
 		for _, note := range notes {
+			fmt.Println("user token", note.CreatedBy)
 
-			if note.CreatedBy == userId {
-				userNotes = append(userNotes, note)
-				fmt.Println("true:", "true")
-			}
-			fmt.Println("true:", "false")
 		}
 		// Return the retrieved notes
-		c.JSON(http.StatusOK, userNotes)
+		c.JSON(http.StatusOK, notes)
 
 	}
 }
@@ -111,10 +116,24 @@ func GetAllNotesNotesHandler() gin.HandlerFunc {
 			fmt.Println("Error decoding notes:", err)
 			return
 		}
-		// Print the value of notes
-		fmt.Println("Notes:", notes)
 
-		// Return the retrieved notes
+		userId, exists := c.Get("uid")
+		if !exists {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "User id not found in context"})
+			return
+		}
+
+		for _, note := range notes {
+
+			fmt.Println("user id:", note.CreatedBy)
+
+			if userId == note.CreatedBy {
+
+				fmt.Println("is true", "true")
+			}
+
+		}
+
 		c.JSON(http.StatusOK, notes)
 
 	}

@@ -7,5 +7,5 @@ type Notes struct {
 	NotesHeading     *string            `json:"heading"`
 	NotesDescription *string            `json:"notesDescription"`
 	TimeStamp        *string            `json:"timeStamp"`
-	CreatedBy        string             `json:"createdBy"`
+	CreatedBy        string             `bson:"createdBy" json:"createdBy"`
 }
