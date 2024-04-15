@@ -21,7 +21,7 @@ func CreateNoteHandler() gin.HandlerFunc {
 
 		var note models.Notes
 		token := c.Request.Header.Get("token")
-		fmt.Printf(token)
+		fmt.Println(token)
 		if err := c.BindJSON(&note); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
@@ -63,13 +63,13 @@ func GetNotesHandler() gin.HandlerFunc {
 
 		userId, exists := c.Get("uid")
 		if !exists {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "User id not found in context"})
+			c.JSON(http.StatusInternalServerError, response.ErrorResponse("Error: User id not found in context"))
 			return
 		}
 
 		cursor, err := noteCollection.Find(context.Background(), bson.M{"createdBy": userId})
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to retrive the notes "})
+			c.JSON(http.StatusInternalServerError, response.ErrorResponse("Error: failed to retrive the notes "))
 			fmt.Println("Error querying database:", err)
 			return
 		}
@@ -80,7 +80,7 @@ func GetNotesHandler() gin.HandlerFunc {
 		// Create a new slice to store filtered notes
 
 		if err := cursor.All(context.Background(), &notes); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve notes"})
+			c.JSON(http.StatusInternalServerError, response.ErrorResponse("Error: failed to retrive the notes "))
 			fmt.Println("Error decoding notes:", err)
 			return
 		}
@@ -91,7 +91,7 @@ func GetNotesHandler() gin.HandlerFunc {
 
 		}
 		// Return the retrieved notes
-		c.JSON(http.StatusOK, notes)
+		c.JSON(http.StatusOK, response.SuccessResponse(notes))
 
 	}
 }
@@ -145,18 +145,18 @@ func UpdateNoteHandler() gin.HandlerFunc {
 
 		// Parse request body to extract values to update
 		if err := c.BindJSON(&updateValues); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+			c.JSON(http.StatusBadRequest, response.ErrorResponse("Error: Invalid request body"))
 			return
 		}
 
 		noteID := c.Param("noteID")
 		if noteID == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Note Id is not provided"})
+			c.JSON(http.StatusBadRequest, response.ErrorResponse("Error: Note Id is not provided"))
 		}
 
 		// Check if updateValues is empty
 		if len(updateValues) == 0 {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "No update values provided"})
+			c.JSON(http.StatusBadRequest, response.ErrorResponse("Error: No update values provided"))
 			return
 		}
 
@@ -174,16 +174,16 @@ func UpdateNoteHandler() gin.HandlerFunc {
 
 		updateResult, err := noteCollection.UpdateOne(context.Background(), filter, update)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update note", "details": err.Error()})
+			c.JSON(http.StatusInternalServerError, response.ErrorResponse("Error: Failed to update note details:"+err.Error()))
 			return
 		}
 
 		// Check if any documents were matched and modified
 		if updateResult.MatchedCount == 0 {
-			c.JSON(http.StatusNotFound, gin.H{"error": "No matching document found for update"})
+			c.JSON(http.StatusNotFound, response.ErrorResponse("Error: No matching document found for update"))
 			return
 		}
-		c.JSON(http.StatusOK, updateResult)
+		c.JSON(http.StatusOK, response.SuccessResponse("Notes Update successfully "))
 
 	}
 }
@@ -193,23 +193,24 @@ func DeleteNoteHandler() gin.HandlerFunc {
 
 		noteID := c.Param("noteID")
 		if noteID == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Note Id is not provided"})
+			c.JSON(http.StatusBadRequest, response.ErrorResponse("Error:  Note Id is not provided"))
 		}
 
 		noteIDHex, err := primitive.ObjectIDFromHex(noteID)
 		if err != nil {
 			// Handle error
+			c.JSON(http.StatusBadRequest, response.ErrorResponse("Error: "+err.Error()))
 			fmt.Println("Invalid note ID:", err)
 			return
 		}
 
-		updateResult, err := noteCollection.DeleteOne(context.Background(), noteIDHex)
+		deleteResult, err := noteCollection.DeleteOne(context.Background(), noteIDHex)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update note", "details": err.Error()})
+			c.JSON(http.StatusInternalServerError, response.ErrorResponse("Error: Failed to update note  details:"+err.Error()))
 			return
 		}
 
-		c.JSON(http.StatusOK, updateResult)
+		c.JSON(http.StatusOK, response.SuccessResponse(deleteResult))
 
 	}
 }
