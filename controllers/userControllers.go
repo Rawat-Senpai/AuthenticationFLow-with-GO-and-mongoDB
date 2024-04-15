@@ -6,6 +6,7 @@ import (
 	"github/rawat-senpai/database"
 	"github/rawat-senpai/helpers"
 	"github/rawat-senpai/models"
+	"github/rawat-senpai/response"
 	"log"
 	"net/http"
 	"time"
@@ -88,7 +89,8 @@ func SignUp() gin.HandlerFunc {
 		}
 
 		if count > 0 {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "this email or password is invalid "})
+			// c.JSON(http.StatusInternalServerError, gin.H{"error": "this email or password is invalid "})
+			c.JSON(http.StatusInternalServerError, response.NewErrorResponse(false, "Error: This error or password is invalid "))
 			return
 		}
 
@@ -106,12 +108,12 @@ func SignUp() gin.HandlerFunc {
 
 		if insertErr != nil {
 			msg := fmt.Sprintf("User item was not created")
-			c.JSON(http.StatusInternalServerError, gin.H{"error": msg})
+			c.JSON(http.StatusInternalServerError, response.NewErrorResponse(false, "Error: "+msg))
 			return
 		}
 		defer cancel()
 
-		c.JSON(http.StatusOK, resultInsertionNumber)
+		c.JSON(http.StatusOK, response.NewSuccessResponse(resultInsertionNumber))
 
 	}
 }
@@ -133,7 +135,7 @@ func Login() gin.HandlerFunc {
 		defer cancel()
 
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "login or password is wrong "})
+			c.JSON(http.StatusInternalServerError, response.NewErrorResponse(false, "Error: This error or password is invalid "+err.Error()))
 			return
 		}
 
@@ -141,7 +143,7 @@ func Login() gin.HandlerFunc {
 		defer cancel()
 
 		if passwordIsValid != true {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": msg})
+			c.JSON(http.StatusInternalServerError, response.NewErrorResponse(false, "Error: "+msg))
 			return
 		}
 
@@ -149,7 +151,7 @@ func Login() gin.HandlerFunc {
 
 		helpers.UpdateAllTokens(token, refreshToken, foundUser.User_id)
 
-		c.JSON(http.StatusOK, foundUser)
+		c.JSON(http.StatusOK, response.NewSuccessResponse(foundUser))
 
 	}
 }

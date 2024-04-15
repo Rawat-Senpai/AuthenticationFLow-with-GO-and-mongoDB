@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github/rawat-senpai/database"
 	"github/rawat-senpai/models"
+	"github/rawat-senpai/response"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -27,35 +28,32 @@ func CreateNoteHandler() gin.HandlerFunc {
 		}
 
 		if token == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"Message": "Authorization Header Not Found"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, response.NewErrorResponse(false, "Authorization Header Not Found"))
 			return
 		}
 
 		userId, exists := c.Get("uid")
 		if !exists {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "User id not found in context"})
+			c.JSON(http.StatusInternalServerError, response.NewErrorResponse(false, "User Id is not found in Header "))
 			return
 		}
 
 		userIdString, ok := userId.(string)
 		if !ok {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "User id is not a string"})
+			c.JSON(http.StatusInternalServerError, response.NewErrorResponse(false, "User Id is not in string format"))
 			return
 		}
 
-		// Associate the note with the user
 		note.CreatedBy = userIdString
-		// Associate the note with the user
-		// note.CreatedBy = userId.(string)
 
 		result, err := noteCollection.InsertOne(context.Background(), note)
 
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create note"})
+			c.JSON(http.StatusInternalServerError, response.NewErrorResponse(false, "error while createing notes "+err.Error()))
 			return
 		}
 
-		c.JSON(http.StatusOK, result)
+		c.JSON(http.StatusOK, response.NewSuccessResponse(result))
 
 	}
 }
@@ -185,6 +183,32 @@ func UpdateNoteHandler() gin.HandlerFunc {
 			c.JSON(http.StatusNotFound, gin.H{"error": "No matching document found for update"})
 			return
 		}
+		c.JSON(http.StatusOK, updateResult)
+
+	}
+}
+
+func DeleteNoteHandler() gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		noteID := c.Param("noteID")
+		if noteID == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Note Id is not provided"})
+		}
+
+		noteIDHex, err := primitive.ObjectIDFromHex(noteID)
+		if err != nil {
+			// Handle error
+			fmt.Println("Invalid note ID:", err)
+			return
+		}
+
+		updateResult, err := noteCollection.DeleteOne(context.Background(), noteIDHex)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update note", "details": err.Error()})
+			return
+		}
+
 		c.JSON(http.StatusOK, updateResult)
 
 	}
