@@ -28,19 +28,19 @@ func CreateNoteHandler() gin.HandlerFunc {
 		}
 
 		if token == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, response.NewErrorResponse(false, "Authorization Header Not Found"))
+			c.AbortWithStatusJSON(http.StatusUnauthorized, response.ErrorResponse("Authorization Header Not Found"))
 			return
 		}
 
 		userId, exists := c.Get("uid")
 		if !exists {
-			c.JSON(http.StatusInternalServerError, response.NewErrorResponse(false, "User Id is not found in Header "))
+			c.JSON(http.StatusInternalServerError, response.ErrorResponse("User Id is not found in Header "))
 			return
 		}
 
 		userIdString, ok := userId.(string)
 		if !ok {
-			c.JSON(http.StatusInternalServerError, response.NewErrorResponse(false, "User Id is not in string format"))
+			c.JSON(http.StatusInternalServerError, response.ErrorResponse("User Id is not in string format"))
 			return
 		}
 
@@ -49,11 +49,11 @@ func CreateNoteHandler() gin.HandlerFunc {
 		result, err := noteCollection.InsertOne(context.Background(), note)
 
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, response.NewErrorResponse(false, "error while createing notes "+err.Error()))
+			c.JSON(http.StatusInternalServerError, response.ErrorResponse("error while createing notes "+err.Error()))
 			return
 		}
 
-		c.JSON(http.StatusOK, response.NewSuccessResponse(result))
+		c.JSON(http.StatusOK, response.SuccessResponse(result))
 
 	}
 }

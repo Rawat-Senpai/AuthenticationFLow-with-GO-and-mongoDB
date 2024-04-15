@@ -16,5 +16,5 @@ type User struct {
 	User_id       string             `json:"user_id"`
 	Created_at    time.Time          `json:"created_at"`
 	Updated_at    time.Time          `json:"updated_at"`
-	Phone         *string            `json:"phone" validate:"required"`
+	Phone         *string            `json:"phone"`
 }

@@ -3,6 +3,7 @@ package middleware
 import (
 	"fmt"
 	"github/rawat-senpai/helpers"
+	"github/rawat-senpai/response"
 	"net/http"
 	"strings"
 
@@ -14,23 +15,26 @@ import (
 func Authentication() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
-		clientToken := c.Request.Header.Get("token")
+		reqToken := c.Request.Header.Get("Authorization")
 
-		if clientToken == "" {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("No authentication header provided")})
-			c.Abort()
+		if reqToken == "" {
+			c.JSON(http.StatusInternalServerError, response.ErrorResponse("Error: "+"Authorization Token Required"))
 			return
 		}
 
-		reqToken := c.Request.Header.Get("Authorization")
 		splitToken := strings.Split(reqToken, "Bearer ")
+
+		if len(splitToken) < 2 {
+			c.JSON(http.StatusInternalServerError, response.ErrorResponse("error"+"Authorization Token is invalid"))
+		}
+
 		reqToken = splitToken[1]
 
 		fmt.Printf("final token passwd in bearer" + reqToken)
 
-		claims, err := helpers.ValidateToken(clientToken)
+		claims, err := helpers.ValidateToken(reqToken)
 		if err != "" {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+			c.JSON(http.StatusInternalServerError, response.ErrorResponse("Error: "+err))
 			c.Abort()
 			return
 		}

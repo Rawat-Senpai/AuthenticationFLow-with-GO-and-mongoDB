@@ -6,18 +6,8 @@ type Response struct {
 	Data    interface{} `json:"data"`
 }
 
-//  NewErrorResponse creates a new error response
-
-func NewErrorResponse(success bool, message string) Response {
-	return Response{
-		Success: success,
-		Message: message,
-	}
-}
-
 // New Success Response creats a new success response
-
-func NewSuccessResponse(data interface{}) Response {
+func SuccessResponse(data interface{}) Response {
 	return Response{
 		Success: true,
 		Message: "Success",

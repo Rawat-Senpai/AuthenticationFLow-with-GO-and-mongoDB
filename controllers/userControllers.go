@@ -90,7 +90,7 @@ func SignUp() gin.HandlerFunc {
 
 		if count > 0 {
 			// c.JSON(http.StatusInternalServerError, gin.H{"error": "this email or password is invalid "})
-			c.JSON(http.StatusInternalServerError, response.NewErrorResponse(false, "Error: This error or password is invalid "))
+			c.JSON(http.StatusInternalServerError, response.ErrorResponse("Error: This error or password is invalid "))
 			return
 		}
 
@@ -108,12 +108,12 @@ func SignUp() gin.HandlerFunc {
 
 		if insertErr != nil {
 			msg := fmt.Sprintf("User item was not created")
-			c.JSON(http.StatusInternalServerError, response.NewErrorResponse(false, "Error: "+msg))
+			c.JSON(http.StatusInternalServerError, response.ErrorResponse("Error: "+msg))
 			return
 		}
 		defer cancel()
 
-		c.JSON(http.StatusOK, response.NewSuccessResponse(resultInsertionNumber))
+		c.JSON(http.StatusOK, response.SuccessResponse(resultInsertionNumber))
 
 	}
 }
@@ -135,7 +135,7 @@ func Login() gin.HandlerFunc {
 		defer cancel()
 
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, response.NewErrorResponse(false, "Error: This error or password is invalid "+err.Error()))
+			c.JSON(http.StatusInternalServerError, response.ErrorResponse("Error: This error or password is invalid "+err.Error()))
 			return
 		}
 
@@ -143,7 +143,7 @@ func Login() gin.HandlerFunc {
 		defer cancel()
 
 		if passwordIsValid != true {
-			c.JSON(http.StatusInternalServerError, response.NewErrorResponse(false, "Error: "+msg))
+			c.JSON(http.StatusInternalServerError, response.ErrorResponse("Error: "+msg))
 			return
 		}
 
@@ -151,7 +151,7 @@ func Login() gin.HandlerFunc {
 
 		helpers.UpdateAllTokens(token, refreshToken, foundUser.User_id)
 
-		c.JSON(http.StatusOK, response.NewSuccessResponse(foundUser))
+		c.JSON(http.StatusOK, response.SuccessResponse(foundUser))
 
 	}
 }
