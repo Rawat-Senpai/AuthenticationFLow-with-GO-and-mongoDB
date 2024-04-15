@@ -17,10 +17,10 @@ func Authentication() gin.HandlerFunc {
 
 		reqToken := c.Request.Header.Get("Authorization")
 
-		if reqToken == "" {
-			c.JSON(http.StatusInternalServerError, response.ErrorResponse("Error: "+"Authorization Token Required"))
-			return
-		}
+		// if reqToken == "" {
+		// 	c.JSON(http.StatusInternalServerError, response.ErrorResponse("Error: "+"Authorization Token Required"))
+		// 	return
+		// }
 
 		splitToken := strings.Split(reqToken, "Bearer ")
 

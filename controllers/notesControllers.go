@@ -20,17 +20,17 @@ func CreateNoteHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		var note models.Notes
-		token := c.Request.Header.Get("token")
-		fmt.Println(token)
+		// token := c.Request.Header.Get("token")
+		// fmt.Println(token)
 		if err := c.BindJSON(&note); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 
-		if token == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, response.ErrorResponse("Authorization Header Not Found"))
-			return
-		}
+		// if token == "" {
+		// 	c.AbortWithStatusJSON(http.StatusUnauthorized, response.ErrorResponse("Authorization Header Not Found"))
+		// 	return
+		// }
 
 		userId, exists := c.Get("uid")
 		if !exists {
