@@ -29,6 +29,7 @@ func main() {
 
 	routes.UserRoutes(router)
 	routes.NotesRoutes(router)
+	routes.UserProfileRoutes(router)
 
 	router.Run(":" + port)
 
