@@ -111,16 +111,59 @@ func ConfirmOtp() gin.HandlerFunc {
 			return
 		}
 
-		// Update the OTP value in the database
-		update := bson.M{"$set": bson.M{"otp": ""}}
-		filter := bson.M{"email": userModel.Email}
-		_, updateErr := userCollection.UpdateOne(ctx, filter, update)
-		if updateErr != nil {
-			c.JSON(http.StatusInternalServerError, response.ErrorResponse("Error: Failed to update OTP"))
+		if userModel.Otp != foundUser.Otp {
+			c.JSON(http.StatusInternalServerError, response.ErrorResponse("Error: Otp doesnt match"))
 			return
 		}
 
-		c.JSON(http.StatusOK, response.SuccessResponse("OTP sent successfully"))
+		// Update the OTP value in the database
+		update := bson.M{"$set": bson.M{"otp": "123456"}}
+		filter := bson.M{"email": userModel.Email}
+		_, updateErr := userCollection.UpdateOne(ctx, filter, update)
+		if updateErr != nil {
+			c.JSON(http.StatusInternalServerError, response.ErrorResponse("Error: Failed to save New pass"))
+			return
+		}
+
+		c.JSON(http.StatusOK, response.SuccessResponse("Opt successfully varified"))
+
+	}
+}
+func UpdatePassword() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var ctx, _ = context.WithTimeout(context.Background(), 100*time.Second)
+
+		var userModel models.AuthenticationModel
+		if err := c.BindJSON(&userModel); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		// Check if the user with the provided email exists
+		var foundUser models.AuthenticationModel
+		err := userCollection.FindOne(ctx, bson.M{"email": userModel.Email}).Decode(&foundUser)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, response.ErrorResponse("Error: This email does not exist"))
+			return
+		}
+
+		if foundUser.Otp != "123456" {
+			c.JSON(http.StatusInternalServerError, response.ErrorResponse("Error: You are not authorized to change the password"))
+			return
+		}
+
+		password := HashPassword(*&userModel.Password)
+
+		update := bson.M{"$set": bson.M{"otp": "", "password": &password}}
+
+		filter := bson.M{"email": userModel.Email}
+		_, updateErr := userCollection.UpdateOne(ctx, filter, update)
+		if updateErr != nil {
+			c.JSON(http.StatusInternalServerError, response.ErrorResponse("Error: Failed to save New pass"))
+			return
+		}
+
+		c.JSON(http.StatusOK, response.SuccessResponse("Password is changed successfully"))
 
 	}
 }
