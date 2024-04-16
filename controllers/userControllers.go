@@ -81,16 +81,7 @@ func SignUp() gin.HandlerFunc {
 		password := HashPassword(*user.Passowrd)
 		user.Passowrd = &password
 
-		count, err = userCollection.CountDocuments(ctx, bson.M{"phone": user.Phone})
-		defer cancel()
-		if err != nil {
-			log.Panic(err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "error occured while checking for the phone number "})
-			return
-		}
-
 		if count > 0 {
-			// c.JSON(http.StatusInternalServerError, gin.H{"error": "this email or password is invalid "})
 			c.JSON(http.StatusInternalServerError, response.ErrorResponse("Error: This error or password is invalid "))
 			return
 		}
@@ -100,12 +91,13 @@ func SignUp() gin.HandlerFunc {
 
 		user.ID = primitive.NewObjectID()
 		user.User_id = user.ID.Hex()
+		user.Profile = ""
 
 		token, refreshToken, _ := helpers.GenerateAllToken(*user.Email, *user.Name, user.User_id)
 		user.Token = &token
 		user.Refresh_token = &refreshToken
 
-		resultInsertionNumber, insertErr := userCollection.InsertOne(ctx, user)
+		_, insertErr := userCollection.InsertOne(ctx, user)
 
 		if insertErr != nil {
 			msg := fmt.Sprintf("User item was not created")
@@ -114,7 +106,7 @@ func SignUp() gin.HandlerFunc {
 		}
 		defer cancel()
 
-		c.JSON(http.StatusOK, response.SuccessResponse(resultInsertionNumber))
+		c.JSON(http.StatusOK, response.SuccessResponse(user))
 
 	}
 }

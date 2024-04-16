@@ -17,4 +17,6 @@ type User struct {
 	Created_at    time.Time          `bson:"created_at" json:"created_at"`
 	Updated_at    time.Time          `bson:"updated_at" json:"updated_at"`
 	Phone         *string            `bson:"phone" json:"phone"`
+	Profile       string             `bson:"userProfile" json:"profile"`
+	OTP           string             `bson:"otp" json:"otp"`
 }
