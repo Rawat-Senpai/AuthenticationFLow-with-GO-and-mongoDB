@@ -48,5 +48,4 @@ func OpenCollection(client *mongo.Client, collectionName string) *mongo.Collecti
 	var collection *mongo.Collection = client.Database("NotesApplication").Collection(collectionName)
 
 	return collection
-
 }

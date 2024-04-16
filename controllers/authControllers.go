@@ -8,6 +8,7 @@ import (
 	"math/rand"
 	"net/http"
 	"net/smtp"
+	"os"
 	"strconv"
 	"time"
 
@@ -38,7 +39,7 @@ func ForgotPasswordSendOtp() gin.HandlerFunc {
 		auth := smtp.PlainAuth(
 			"",
 			"shobhitrawat84@gmail.com",
-			"pnlgneiiyjfccpbt",
+			os.Getenv("GMAIL_PASSWORD"),
 			"smtp.gmail.com",
 		)
 
