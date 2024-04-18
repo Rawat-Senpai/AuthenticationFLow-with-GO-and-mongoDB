@@ -123,7 +123,7 @@ func ConfirmOtp() gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, response.SuccessResponse("Opt successfully varified"))
+		c.JSON(http.StatusOK, response.SuccessResponse("OTP successfully varified"))
 
 	}
 }
@@ -133,7 +133,7 @@ func UpdatePassword() gin.HandlerFunc {
 
 		var userModel models.AuthenticationModel
 		if err := c.BindJSON(&userModel); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c.JSON(http.StatusBadRequest, response.ErrorResponse("Error: -"+err.Error()))
 			return
 		}
 
@@ -150,7 +150,7 @@ func UpdatePassword() gin.HandlerFunc {
 			return
 		}
 
-		password := HashPassword(*&userModel.Password)
+		password := HashPassword(userModel.Password)
 
 		update := bson.M{"$set": bson.M{"otp": "", "password": &password}}
 
