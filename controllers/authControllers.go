@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"context"
-	"fmt"
 	"github/rawat-senpai/models"
 	"github/rawat-senpai/response"
 	"math/rand"
@@ -67,7 +66,6 @@ func ForgotPasswordSendOtp() gin.HandlerFunc {
 			return
 		}
 
-		fmt.Println("Found User", foundUser)
 		// Generate a random OTP
 		randomString := generateRandomString()
 
@@ -99,7 +97,7 @@ func ConfirmOtp() gin.HandlerFunc {
 
 		var userModel models.AuthenticationModel
 		if err := c.BindJSON(&userModel); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c.JSON(http.StatusBadRequest, response.ErrorResponse("Error :-"+err.Error()))
 			return
 		}
 

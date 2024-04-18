@@ -128,7 +128,7 @@ func Login() gin.HandlerFunc {
 		defer cancel()
 
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, response.ErrorResponse("Error: This error or password is invalid "+err.Error()))
+			c.JSON(http.StatusInternalServerError, response.ErrorResponse("Error: This email or password is invalid "+err.Error()))
 			return
 		}
 
