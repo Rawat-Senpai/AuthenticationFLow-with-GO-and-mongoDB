@@ -25,7 +25,8 @@ func Authentication() gin.HandlerFunc {
 		splitToken := strings.Split(reqToken, "Bearer ")
 
 		if len(splitToken) < 2 {
-			c.JSON(http.StatusInternalServerError, response.ErrorResponse("error"+"Authorization Token is invalid"))
+			c.JSON(http.StatusInternalServerError, response.ErrorResponse("Error :-Authorization Token is invalid"))
+			return
 		}
 
 		reqToken = splitToken[1]
